@@ -2,82 +2,77 @@
 	"easycom": {
 		"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
 	},
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": [
 		{
-			"path": "pages/login/index",
+			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "登录"
-			}
-		},
-		{
-			"path": "pages/official-stock/index",
-			"style": {
-				"navigationBarTitleText": "官方股票",
-				// "navigationStyle": "custom"
+				"navigationBarTitleText": "官方市场",
 				"enablePullDownRefresh": true
 			}
 		},
 		{
-			"path": "pages/user-stock/index",
+			"path": "pages/hall/index",
 			"style": {
-				"navigationBarTitleText": "用户股票"
-				// "navigationStyle": "custom"
+				"navigationBarTitleText": "交易大厅",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/assets/index",
+			"style": {
+				"navigationBarTitleText": "我的持仓",
+				"enablePullDownRefresh": true
 			}
 		},
 		{
 			"path": "pages/mine/index",
 			"style": {
-				"navigationBarTitleText": "我的"
-				// "navigationStyle": "custom"
+				"navigationBarTitleText": "个人中心"
 			}
 		},
 		{
-			"path": "pages/user-stock-details/index",
+			"path": "pages/login/index",
 			"style": {
-				"backgroundTextStyle": "light",
-				// "navigationStyle": "custom", // 隐藏系统导航栏
-				"navigationBarTitleText": "用户股票详情",
-				"navigationBarTextStyle": "black" // 状态栏字体为白色，只能为 white-白色，black-黑色 二选一
-			}
-		},
-		{
-			"path": "pages/official-stock-details/index",
-			"style": {
-				// "backgroundTextStyle": "light",
-				// "navigationStyle": "custom", // 隐藏系统导航栏
-				"navigationBarTitleText": "官方股票详情"
-				// "navigationBarTextStyle": "black" // 状态栏字体为白色，只能为 white-白色，black-黑色 二选一
+				"navigationBarTitleText": "登录"
 			}
 		}
 	],
 	"tabBar": {
-		// "custom": true,
 		"color": "#909399",
 		"selectedColor": "#2979ff",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
-		"fontSize": "26rpx",
-		"list": [{
-				"pagePath": "pages/official-stock/index",
-				"text": "官方股票"
-			}, {
-				"pagePath": "pages/user-stock/index",
-				"text": "用户股票"
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "市场",
+				"iconPath": "static/logo.png",
+				"selectedIconPath": "static/logo.png"
+			},
+			{
+				"pagePath": "pages/hall/index",
+				"text": "大厅",
+				"iconPath": "static/logo.png",
+				"selectedIconPath": "static/logo.png"
+			},
+			{
+				"pagePath": "pages/assets/index",
+				"text": "持仓",
+				"iconPath": "static/logo.png",
+				"selectedIconPath": "static/logo.png"
 			},
 			{
 				"pagePath": "pages/mine/index",
-				"text": "我的"
+				"text": "我的",
+				"iconPath": "static/logo.png",
+				"selectedIconPath": "static/logo.png"
 			}
 		]
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "taoquan",
+		"navigationBarTitleText": "云股东",
 		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8",
-		"mp-alipay": {
-			"allowsBounceVertical": "NO"
-		}
-	},
-	"uniIdRouter": {}
+		"backgroundColor": "#F8F8F8"
+	}
 }

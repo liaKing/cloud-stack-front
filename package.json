@@ -1,5 +1,52 @@
 {
+  "name": "cloud-stock",
+  "version": "1.0.0",
+  "description": "云股东",
+  "scripts": {
+    "dev:h5": "cross-env NODE_ENV=development UNI_PLATFORM=h5 UNI_INPUT_DIR=. UNI_CLI_CONTEXT=. vue-cli-service uni-serve",
+    "build:h5": "cross-env NODE_ENV=production UNI_PLATFORM=h5 UNI_INPUT_DIR=. UNI_CLI_CONTEXT=. vue-cli-service uni-build",
+    "dev:mp-weixin": "cross-env NODE_ENV=development UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. UNI_CLI_CONTEXT=. vue-cli-service uni-build --watch",
+    "build:mp-weixin": "cross-env NODE_ENV=production UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. UNI_CLI_CONTEXT=. vue-cli-service uni-build"
+  },
   "dependencies": {
-    "uview-ui": "^2.0.36"
-  }
+    "bl": "^6.1.6",
+    "uview-ui": "^2.0.36",
+    "vue": "^2.6.14",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@dcloudio/uni-automator": "^2.0.2-4080720251210002",
+    "@dcloudio/uni-cli-i18n": "latest",
+    "@dcloudio/uni-cli-shared": "latest",
+    "@dcloudio/uni-h5": "latest",
+    "@dcloudio/uni-helper-json": "*",
+    "@dcloudio/uni-i18n": "latest",
+    "@dcloudio/uni-migration": "latest",
+    "@dcloudio/uni-mp-weixin": "latest",
+    "@dcloudio/uni-stat": "latest",
+    "@dcloudio/uni-template-compiler": "latest",
+    "@dcloudio/vue-cli-plugin-uni": "latest",
+    "@dcloudio/webpack-uni-mp-loader": "latest",
+    "@dcloudio/webpack-uni-pages-loader": "latest",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "autoprefixer": "^10.4.19",
+    "babel-loader": "^8.3.0",
+    "cross-env": "^7.0.3",
+    "css-loader": "^6.8.1",
+    "mini-css-extract-plugin": "^2.7.6",
+    "postcss": "^8.4.38",
+    "postcss-comment": "^2.0.0",
+    "postcss-import": "^15.1.0",
+    "postcss-loader": "^6.2.1",
+    "sass": "^1.32.12",
+    "sass-loader": "^12.6.0",
+    "vue-loader": "15.9.8",
+    "vue-template-compiler": "^2.6.14",
+    "webpack": "^5.89.0"
+  },
+  "browserslist": [
+    "Android >= 4",
+    "ios >= 8"
+  ]
 }

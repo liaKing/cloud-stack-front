@@ -4,9 +4,18 @@
 			uni.hideShareMenu({
 				menus: ['shareAppMessage', 'shareTimeline']
 			})
-			// uni.redirectTo({
-			// 	url: "/pages/login/index"
-			// })
+			
+			// Check login status
+			const token = uni.getStorageSync('token');
+			if (!token) {
+				// Use reLaunch to clear page stack and go to login
+				// Need to use setTimeout to ensure router is ready in some environments
+				setTimeout(() => {
+					uni.reLaunch({
+						url: '/pages/login/index'
+					});
+				}, 100);
+			}
 			console.log('App Launch')
 		},
 		onShow: function() {

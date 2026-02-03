@@ -1,220 +1,174 @@
 <template>
-
-	<view style="height:100vh;background: #fff;">
-		<view class="img-a">
-			<view class="t-b">
-				您好，
-				<br />
-				欢迎来到鹿邑套圈
+	<view class="login-container">
+		<view class="logo-box">
+			<image style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" src="/static/logo.png" mode="aspectFill"></image>
+			<text class="title">TaoQuan Trading</text>
+			<text class="subtitle">投壶与交易的即时市场</text>
+		</view>
+		
+		<view class="form-card">
+			<view class="welcome-text">欢迎回来</view>
+			<u--form labelPosition="left" :model="form" ref="uForm">
+				<u-form-item prop="username" class="custom-input">
+					<u--input 
+						v-model="form.username" 
+						placeholder="请输入用户名" 
+						border="none" 
+						prefixIcon="account"
+						prefixIconStyle="font-size: 22px; color: #909399"
+					></u--input>
+				</u-form-item>
+				<u-form-item prop="password" class="custom-input">
+					<u--input 
+						v-model="form.password" 
+						type="password" 
+						placeholder="请输入密码" 
+						border="none"
+						prefixIcon="lock"
+						prefixIconStyle="font-size: 22px; color: #909399"
+					></u--input>
+				</u-form-item>
+			</u--form>
+			
+			<view class="btn-box">
+				<u-button 
+					type="primary" 
+					text="登录" 
+					shape="circle" 
+					customStyle="height: 44px; box-shadow: 0 4px 10px rgba(41, 121, 255, 0.3);"
+					@click="handleLogin" 
+					:loading="loading"
+				></u-button>
 			</view>
 		</view>
-		<view class="login-view" style="">
-			<view class="t-login">
-				<form class="cl">
-					<view class="t-a">
-						<text class="txt">账号</text>
-						<input type="number" name="phone" placeholder="请输入您的账号" maxlength="11"
-							v-model="form.userName" />
-					</view>
-					<view class="t-a">
-						<text class="txt">密码</text>
-						<input type="password" name="code" maxlength="18" placeholder="请输入您的密码"
-							v-model="form.passWord" />
-					</view>
-					<button @tap="getUserLogin()">登 录</button>
-					<!-- <view class="reg" @tap="reg()">注 册</view> -->
-				</form>
-				<!-- 	<view class="t-f"><text>—————— 第三方账号登录 ——————</text></view>
-				<view class="t-e cl">
-					<view class="t-g" @tap="wxLogin()">
-						<image src="https://zhoukaiwen.com/img/loginImg/wx.png"></image>
-					</view>
-					<view class="t-g" @tap="zfbLogin()">
-						<image src="https://zhoukaiwen.com/img/loginImg/qq.png"></image>
-					</view>
-				</view> -->
-			</view>
+		
+		<view class="footer-text">
+			&copy; 2026 TaoQuan System
 		</view>
 	</view>
-
-
 </template>
 
 <script>
-	import {
-		userLogin,
-		userInfo
-	} from "@/utils/api.js"
+	import { login } from '@/api/user.js';
+	
 	export default {
 		data() {
 			return {
 				form: {
-					userName: '',
-					passWord: '',
-				}
+					username: '',
+					password: ''
+				},
+				loading: false
 			}
 		},
-		onLoad() {},
 		methods: {
-			// 用户登录
-			getUserLogin() {
-				userLogin(this.form).then(res => {
-					if (res.code == 0) {
-						uni.setStorageSync("access_token", res.data.access_token)
-						this.$store.commit('setAccessToken', res.data.access_token)
-						this.getUserInfo()
-						uni.switchTab({
-							url: '/pages/official-stock/index'
-						})
+			async handleLogin() {
+				if (!this.form.username || !this.form.password) {
+					uni.showToast({
+						title: '请输入用户名和密码',
+						icon: 'none'
+					});
+					return;
+				}
+				
+				this.loading = true;
+				try {
+					const res = await login(this.form);
+					// Assuming response format: { code: 200, data: { token: '...' }, msg: '...' }
+					// Adjust based on actual API response
+					if (res.code === 200 || res.code === 0) {
+						this.$store.dispatch('login', res.data.token); // Store token
+						this.$store.dispatch('updateUserInfo'); // Fetch user info
+						uni.showToast({
+							title: '登录成功',
+							icon: 'success'
+						});
+						setTimeout(() => {
+							uni.switchTab({
+								url: '/pages/index/index'
+							});
+						}, 1000);
+					} else {
+						uni.showToast({
+							title: res.msg || '登录失败',
+							icon: 'none'
+						});
 					}
-				})
-			},
-			// 用户个人信息
-			getUserInfo() {
-				userInfo().then(res => {
-					console.log("res1", res)
-				})
+				} catch (e) {
+					console.error(e);
+				} finally {
+					this.loading = false;
+				}
 			}
 		}
 	}
 </script>
+
 <style lang="scss" scoped>
-	// .login {
-
-	// 	padding: 10rpx 10rpx 10rpx 10rpx;
-	// }
-	.txt {
-		font-size: 32rpx;
-		font-weight: bold;
-		color: #333333;
+.login-container {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+	padding: 60px 30px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	
+	.logo-box {
+		margin-bottom: 40px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		
+		.logo-img {
+			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+		}
+		
+		.title {
+			margin-top: 20px;
+			font-size: 28px;
+			font-weight: 800;
+			color: #303133;
+			letter-spacing: 1px;
+		}
+		
+		.subtitle {
+			margin-top: 8px;
+			font-size: 14px;
+			color: #606266;
+			letter-spacing: 0.5px;
+		}
 	}
-
-	.img-a {
+	
+	.form-card {
 		width: 100%;
-		height: 450rpx;
-		background-image: url(https://zhoukaiwen.com/img/loginImg/head.png);
-		background-size: 100%;
+		background: #ffffff;
+		border-radius: 16px;
+		padding: 30px 20px;
+		box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+		
+		.welcome-text {
+			font-size: 20px;
+			font-weight: bold;
+			color: #303133;
+			margin-bottom: 25px;
+		}
+		
+		.custom-input {
+			background-color: #f5f7fa;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			padding: 4px 10px;
+		}
+		
+		.btn-box {
+			margin-top: 30px;
+		}
 	}
-
-	.reg {
-		font-size: 28rpx;
-		color: #fff;
-		height: 90rpx;
-		line-height: 90rpx;
-		border-radius: 50rpx;
-		font-weight: bold;
-		background: #f5f6fa;
-		color: #000000;
-		text-align: center;
-		margin-top: 30rpx;
+	
+	.footer-text {
+		margin-top: auto;
+		font-size: 12px;
+		color: #909399;
 	}
-
-	.login-view {
-		width: 100%;
-		position: relative;
-		margin-top: -120rpx;
-		background-color: #ffffff;
-		border-radius: 8% 8% 0% 0;
-	}
-
-	.t-login {
-		width: 600rpx;
-		margin: 0 auto;
-		font-size: 28rpx;
-		padding-top: 80rpx;
-	}
-
-	.t-login button {
-		font-size: 28rpx;
-		background: #2796f2;
-		color: #fff;
-		height: 90rpx;
-		line-height: 90rpx;
-		border-radius: 50rpx;
-		font-weight: bold;
-	}
-
-	.t-login input {
-		height: 90rpx;
-		line-height: 90rpx;
-		margin-bottom: 50rpx;
-		border-bottom: 1px solid #e9e9e9;
-		font-size: 28rpx;
-	}
-
-	.t-login .t-a {
-		position: relative;
-	}
-
-	.t-b {
-		text-align: left;
-		font-size: 42rpx;
-		color: #ffffff;
-		padding: 130rpx 0 0 70rpx;
-		font-weight: bold;
-		line-height: 70rpx;
-	}
-
-	.t-login .t-c {
-		position: absolute;
-		right: 22rpx;
-		top: 22rpx;
-		background: #5677fc;
-		color: #fff;
-		font-size: 24rpx;
-		border-radius: 50rpx;
-		height: 50rpx;
-		line-height: 50rpx;
-		padding: 0 25rpx;
-	}
-
-	.t-login .t-d {
-		text-align: center;
-		color: #999;
-		margin: 80rpx 0;
-	}
-
-	.t-login .t-e {
-		text-align: center;
-		width: 250rpx;
-		margin: 80rpx auto 0;
-	}
-
-	.t-login .t-g {
-		float: left;
-		width: 50%;
-	}
-
-	.t-login .t-e image {
-		width: 50rpx;
-		height: 50rpx;
-	}
-
-	.t-login .t-f {
-		text-align: center;
-		margin: 150rpx 0 0 0;
-		color: #666;
-	}
-
-	.t-login .t-f text {
-		margin-left: 20rpx;
-		color: #aaaaaa;
-		font-size: 27rpx;
-	}
-
-	.t-login .uni-input-placeholder {
-		color: #aeaeae;
-	}
-
-	.cl {
-		zoom: 1;
-	}
-
-	.cl:after {
-		clear: both;
-		display: block;
-		visibility: hidden;
-		height: 0;
-		content: '\20';
-	}
+}
 </style>

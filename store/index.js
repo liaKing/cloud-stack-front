@@ -1,32 +1,60 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-Vue.use(Vuex)
-let lifData = {}
-try {
-	lifData = uni.getStorageSync('lifeData')
-} catch (e) {
+import { getUserInfo } from '@/api/user.js'
 
-}
+Vue.use(Vuex)
+
 const store = new Vuex.Store({
 	state: {
-		//公共的变量，这里的变量不能随便修改，只能通过触发mutations的方法才能改变
-		accessToken: "", // 用户token
-		user: "", // 用户个人信息
+		token: uni.getStorageSync('token') || '',
+		userInfo: uni.getStorageSync('userInfo') || {},
+		isLogin: !!uni.getStorageSync('token')
 	},
 	mutations: {
-		//相当于同步的操作
-		// 用户token
-		setAccessToken(state, data) {
-			console.log(state, data)
-			state.accessToken = data
+		SET_TOKEN(state, token) {
+			state.token = token;
+			state.isLogin = !!token;
+			if (token) {
+				uni.setStorageSync('token', token);
+			} else {
+				uni.removeStorageSync('token');
+			}
 		},
-		// 用户个人信息
-		setUser(state, data) {
-			state.user = data
+		SET_USER_INFO(state, info) {
+			state.userInfo = info;
+			uni.setStorageSync('userInfo', info);
 		},
+		LOGOUT(state) {
+			state.token = '';
+			state.userInfo = {};
+			state.isLogin = false;
+			uni.removeStorageSync('token');
+			uni.removeStorageSync('userInfo');
+		}
 	},
 	actions: {
-		//相当于异步的操作,不能直接改变state的值，只能通过触发mutations的方法才能改变
+		// Update user info from server
+		async updateUserInfo({ commit }) {
+			try {
+				const res = await getUserInfo();
+				if (res.code === 200 || res.code === 0) { // Adapt to your backend success code
+					commit('SET_USER_INFO', res.data);
+					return res.data;
+				}
+			} catch (e) {
+				console.error('Update user info failed', e);
+			}
+		},
+		login({ commit }, token) {
+			commit('SET_TOKEN', token);
+		},
+		logout({ commit }) {
+			commit('LOGOUT');
+			uni.reLaunch({
+				url: '/pages/login/index'
+			});
+		}
 	}
 })
+
 export default store

@@ -1,341 +1,296 @@
 <template>
-	<view class="wrapper">
-		<!-- 个人资料 -->
-		<view>
-			<view class="top">
-				<view class="center">
-					<view class="center_top">
-						<view class="center_img">
-							<!-- 这里可以放自己的静态头像 -->
-							<image src="/static/logo.png"></image>
-							<open-data type="userAvatarUrl" class="user_head"></open-data>
-						</view>
-						<view class="center_info">
-							<view class="center_name">
-								<!-- 这里可以放自己的名称图片 -->
-								<view>张三</view>
-							</view>
-							<view class="center_vip">
-								<image class="rank_icon" src="/static/vip.png" />
-
-								<view class="vip_text">
-									<text>普通会员</text>
-								</view>
-							</view>
-						</view>
+	<view class="container">
+		<view class="user-header-card">
+			<view class="header-top">
+				<view class="avatar-box">
+					<u-avatar :src="userInfo.avatar || ''" size="70" shape="circle" icon="account-fill" fontSize="40"></u-avatar>
+				</view>
+				<view class="info-box">
+					<text class="username">{{ userInfo.username || '未登录用户' }}</text>
+					<view class="uid-tag">
+						<text>UID: {{ userInfo.id || '-' }}</text>
+						<u-icon name="file-text" size="14" color="#fff" style="margin-left: 4px"></u-icon>
 					</view>
 				</view>
 			</view>
+			<view class="header-bottom">
+				<view class="stat-item">
+					<text class="num">{{ userInfo.luck || 0 }}</text>
+					<text class="label">幸运值</text>
+				</view>
+				<view class="stat-divider"></view>
+				<view class="stat-item">
+					<text class="num">-</text>
+					<text class="label">总资产</text>
+				</view>
+			</view>
 		</view>
-
-		<!-- 统计 -->
-		<view class="count">
-			<view class="cell"> 8 <text style="color: #AAAAAA;">资产:{{listData.luckNumber }}</text> </view>
-			<view class="cell"> 14 <text style="color: #AAAAAA;">收藏</text> </view>
-			<view class="cell"> 18 <text style="color: #AAAAAA;">关注</text> </view>
-			<view class="cell"> 84 <text style="color: #AAAAAA;">我的足迹</text> </view>
+		
+		<view class="menu-section">
+			<u-cell-group :border="false">
+				<u-cell icon="setting-fill" title="系统设置" isLink size="large" :border="false" customStyle="padding: 16px; background-color: #fff; border-radius: 12px; margin-bottom: 10px;"></u-cell>
+				<u-cell icon="server-fill" title="关于我们" isLink size="large" :border="false" customStyle="padding: 16px; background-color: #fff; border-radius: 12px; margin-bottom: 10px;"></u-cell>
+				<!-- Admin Entry -->
+				<u-cell icon="grid-fill" title="管理员面板" isLink size="large" :border="false" customStyle="padding: 16px; background-color: #fff; border-radius: 12px; margin-bottom: 10px;" @click="showAdmin = true"></u-cell>
+			</u-cell-group>
 		</view>
-		<!-- 其它 -->
-		<view class="extra">
-			<uni-list>
-				<uni-list-item showArrow title="联系客服"></uni-list-item>
-				<uni-list-item showArrow title="意见反馈"></uni-list-item>
-				<uni-list-item showArrow title="关于我们"></uni-list-item>
-			</uni-list>
+		
+		<view class="logout-section">
+			<u-button 
+				type="error" 
+				text="退出登录" 
+				shape="circle" 
+				plain 
+				customStyle="height: 48px; border-width: 1px;"
+				@click="handleLogout"
+			></u-button>
 		</view>
+		
+		<view class="version-text">Version 1.0.0</view>
+		
+		<!-- Admin Popup -->
+		<u-popup :show="showAdmin" mode="bottom" @close="showAdmin = false" :round="16">
+			<view class="admin-panel">
+				<view class="panel-header">
+					<text class="title">管理员控制台</text>
+					<u-icon name="close" size="20" color="#909399" @click="showAdmin = false"></u-icon>
+				</view>
+				
+				<u-collapse accordion :border="false">
+					<u-collapse-item title="🎯 投壶数据录入">
+						<view class="form-content">
+							<u--input v-model="throwForm.playerPay" placeholder="玩家付费金额 (幸运值)" type="number" border="surround" class="mb-10"></u--input>
+							<view class="hit-row">
+								<u--input v-model="throwForm.hitItemId" placeholder="命中项目ID" border="surround" class="flex-1 mr-10"></u--input>
+								<u--input v-model="throwForm.hitCount" placeholder="次数" type="number" border="surround" class="w-80"></u--input>
+							</view>
+							<u-button type="primary" text="提交数据" shape="circle" @click="submitThrowData" customStyle="margin-top: 16px;"></u-button>
+						</view>
+					</u-collapse-item>
+					<u-collapse-item title="💰 每日结算触发">
+						<view class="form-content">
+							<view class="warn-box">
+								<u-icon name="info-circle-fill" color="#f56c6c" size="16"></u-icon>
+								<text class="text">高风险操作：这将强制退还所有用户的股票资金，请确认比赛已结束。</text>
+							</view>
+							<u-button type="error" text="确认执行结算" shape="circle" @click="doSettlement" customStyle="margin-top: 10px;"></u-button>
+						</view>
+					</u-collapse-item>
+				</u-collapse>
+			</view>
+		</u-popup>
 	</view>
 </template>
 
 <script>
+	import { mapState } from 'vuex';
+	import { submitThrow, dailySettlement } from '@/api/admin.js';
+	
 	export default {
 		data() {
 			return {
-				listData: {}
+				showAdmin: false,
+				throwForm: {
+					playerPay: '',
+					hitItemId: '',
+					hitCount: ''
+				}
 			}
 		},
 		computed: {
-
-		},
-		created() {
-
+			...mapState(['userInfo'])
 		},
 		methods: {
-
+			handleLogout() {
+				this.$store.dispatch('logout');
+			},
+			async submitThrowData() {
+				if (!this.throwForm.playerPay) {
+					uni.showToast({ title: '请输入金额', icon: 'none' });
+					return;
+				}
+				
+				// Construct hits array
+				const hits = [];
+				if (this.throwForm.hitItemId && this.throwForm.hitCount) {
+					hits.push({
+						itemId: this.throwForm.hitItemId,
+						hitCount: Number(this.throwForm.hitCount)
+					});
+				}
+				
+				const data = {
+					playerPay: Number(this.throwForm.playerPay),
+					totalItems: 10, // Hardcoded or dynamic? Doc says "totalItems" in req.
+					hits: hits
+				};
+				
+				try {
+					const res = await submitThrow(data);
+					if (res.code === 200 || res.code === 0) {
+						uni.showToast({ title: '录入成功', icon: 'success' });
+						this.throwForm = { playerPay: '', hitItemId: '', hitCount: '' };
+					} else {
+						uni.showToast({ title: res.msg || '失败', icon: 'none' });
+					}
+				} catch (e) {
+					console.error(e);
+				}
+			},
+			async doSettlement() {
+				try {
+					const res = await dailySettlement({});
+					if (res.code === 200 || res.code === 0) {
+						uni.showToast({ title: '结算已触发', icon: 'success' });
+					} else {
+						uni.showToast({ title: res.msg || '失败', icon: 'none' });
+					}
+				} catch (e) {
+					console.error(e);
+				}
+			}
 		}
-	};
+	}
 </script>
 
-<style scoped lang="scss">
-	Page {
-		font-size: 14px;
-	}
+<style lang="scss" scoped>
+.container {
+	padding: 16px;
+	background-color: #f5f7fa;
+	min-height: 100vh;
+}
 
-	.top {
-		width: 100%;
-		height: 130px;
-		// background: #23EBB9;
-		background: #2979ff;
-		padding-top: 15px;
-		position: relative;
-	}
-
-	.center {
-		width: 95%;
-		height: 100px;
-		background: white;
+.user-header-card {
+	background: linear-gradient(135deg, #2979ff, #609cff);
+	border-radius: 16px;
+	padding: 24px;
+	color: #fff;
+	margin-bottom: 24px;
+	box-shadow: 0 8px 20px rgba(41, 121, 255, 0.25);
+	
+	.header-top {
 		display: flex;
-		flex-direction: column;
-		margin: 0 auto;
-		border-radius: 5px;
-	}
-
-	.center_top {
-		display: flex;
-		flex-direction: row;
-		width: 80%;
-		height: 80px;
-		margin: 0 auto;
-		margin-top: 20rpx;
-		border-bottom: 1px solid #EEEEEE;
-	}
-
-	.center_img {
-		width: 66px;
-		height: 66px;
-		border-radius: 50%;
-		overflow: hidden;
-	}
-
-	.center_img image {
-		width: 100%;
-		height: 100%;
-		border-radius: 50%;
-	}
-
-	.center_img .user_head {
-		width: 100%;
-		height: 100%;
-	}
-
-	.center_info {
-		display: flex;
-		flex-direction: column;
-		margin-top: 20rpx;
-		margin-left: 30px;
-	}
-
-	.center_name {
-		font-size: 18px;
-	}
-
-	.center_phone {
-		color: #BEBEBE;
-	}
-
-	// .center_down {
-	// 	display: flex;
-	// 	flex-direction: row;
-	// 	width: 80%;
-	// 	height: 35px;
-	// 	margin: 0 auto;
-	// 	margin-top: 20rpx;
-	// }
-
-	.center_rank {
-		width: 50%;
-		height: 35px;
-		display: flex;
-		flex-direction: row;
-	}
-
-	.rank_text {
-		height: 35px;
-		line-height: 35px;
-		margin-left: 10rpx;
-		color: #AAAAAA;
-	}
-
-	.center_vip image {
-		width: 25px;
-		height: 25px;
-		margin-top: 15rpx;
-	}
-
-	.vip_icon {
-		width: 25px;
-		height: 25px;
-		margin-top: -10rpx;
-	}
-
-	.vip_text {
-		margin-top: -55rpx;
-		margin-left: 50rpx;
-		color: #AAAAAA;
-	}
-
-	.center_rank image {
-		width: 35px;
-		height: 35px;
-	}
-
-	.center_score {
-		width: 50%;
-		height: 35px;
-		display: flex;
-		flex-direction: row;
-	}
-
-	.center_score image {
-		width: 35px;
-		height: 35px;
-	}
-
-	.gif-wave {
-		position: absolute;
-		width: 100%;
-		bottom: 0;
-		left: 0;
-		z-index: 99;
-		mix-blend-mode: screen;
-		height: 100rpx;
-	}
-
-	.wrapper {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		width: 100%;
-		background-color: #F4F4F4;
-	}
-
-	.profile {
-		height: 375rpx;
-		background-color: #ea4451;
-		display: flex;
-		justify-content: center;
 		align-items: center;
-
-		.meta {
-			.avatar {
+		margin-bottom: 24px;
+		
+		.avatar-box {
+			border: 2px solid rgba(255,255,255,0.5);
+			border-radius: 50%;
+		}
+		
+		.info-box {
+			margin-left: 16px;
+			
+			.username {
+				font-size: 20px;
+				font-weight: bold;
+				margin-bottom: 6px;
 				display: block;
-				width: 140rpx;
-				height: 140rpx;
-				border-radius: 50%;
-				border: 2rpx solid #fff;
-				overflow: hidden;
 			}
-
-			.nickname {
-				display: block;
-				text-align: center;
-				margin-top: 20rpx;
-				font-size: 30rpx;
-				color: #fff;
+			
+			.uid-tag {
+				background-color: rgba(255,255,255,0.2);
+				padding: 2px 8px;
+				border-radius: 4px;
+				font-size: 12px;
+				display: inline-flex;
+				align-items: center;
 			}
 		}
 	}
-
-	.count {
+	
+	.header-bottom {
 		display: flex;
-		margin: 0 20rpx;
-		height: 120rpx;
-		text-align: center;
-		border-radius: 4rpx;
-		background-color: #fff;
-
-		position: relative;
-		top: 10rpx;
-
-		.cell {
-			margin-top: 10rpx;
-			flex: 1;
-			padding-top: 20rpx;
-			font-size: 27rpx;
-			color: #333;
-		}
-
-		text {
-			display: block;
-			font-size: 24rpx;
-		}
-	}
-
-	.orders {
-		margin: 20rpx 20rpx 0 20rpx;
-		padding: 40rpx 0;
-		background-color: #fff;
-		border-radius: 4rpx;
-
-		.title {
-			padding-left: 20rpx;
-			font-size: 30rpx;
-			color: #333;
-			padding-bottom: 20rpx;
-			border-bottom: 1rpx solid #eee;
-			margin-top: -30rpx;
-		}
-
-		.sorts {
-			padding-top: 30rpx;
-			text-align: center;
+		justify-content: space-around;
+		align-items: center;
+		
+		.stat-item {
 			display: flex;
+			flex-direction: column;
+			align-items: center;
+			
+			.num {
+				font-size: 24px;
+				font-weight: bold;
+				margin-bottom: 4px;
+			}
+			
+			.label {
+				font-size: 12px;
+				opacity: 0.8;
+			}
 		}
+		
+		.stat-divider {
+			width: 1px;
+			height: 30px;
+			background-color: rgba(255,255,255,0.2);
+		}
+	}
+}
 
-		[class*="icon-"] {
-			flex: 1;
-			font-size: 24rpx;
+.menu-section {
+	margin-bottom: 30px;
+}
 
-			&::before {
-				display: block;
-				font-size: 48rpx;
-				margin-bottom: 8rpx;
-				color: #ea4451;
+.logout-section {
+	padding: 0 10px;
+}
+
+.version-text {
+	text-align: center;
+	color: #c0c4cc;
+	font-size: 12px;
+	margin-top: 20px;
+}
+
+.admin-panel {
+	padding: 20px;
+	background-color: #fff;
+	
+	.panel-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20px;
+		
+		.title {
+			font-size: 18px;
+			font-weight: bold;
+			color: #303133;
+		}
+	}
+	
+	.form-content {
+		padding: 10px 0;
+		
+		.mb-10 {
+			margin-bottom: 10px;
+		}
+		
+		.hit-row {
+			display: flex;
+			
+			.flex-1 { flex: 1; }
+			.mr-10 { margin-right: 10px; }
+			.w-80 { width: 80px; }
+		}
+		
+		.warn-box {
+			background-color: #fef0f0;
+			padding: 10px;
+			border-radius: 8px;
+			display: flex;
+			align-items: flex-start;
+			gap: 6px;
+			margin-bottom: 10px;
+			
+			.text {
+				font-size: 12px;
+				color: #f56c6c;
+				line-height: 1.4;
 			}
 		}
 	}
-
-	.address {
-		line-height: 1;
-		background-color: #fff;
-		font-size: 30rpx;
-		padding: 25rpx 0 25rpx 20rpx;
-		margin: 10rpx 20rpx;
-		color: #333;
-		border-radius: 4rpx;
-	}
-
-	.extra {
-		margin: 10rpx 20rpx;
-		background-color: #fff;
-		border-radius: 4rpx;
-
-		.item {
-			line-height: 1;
-			padding: 25rpx 0 25rpx 20rpx;
-			border-bottom: 1rpx solid #eee;
-			font-size: 30rpx;
-			color: #333;
-		}
-
-		button {
-			text-align: left;
-			background-color: #fff;
-
-			&::after {
-				border: none;
-				border-radius: 0;
-			}
-		}
-	}
-
-	.icon-arrow {
-		position: relative;
-
-		&::before {
-			position: absolute;
-			top: 50%;
-			right: 20rpx;
-			transform: translateY(-50%);
-		}
-	}
+}
 </style>
