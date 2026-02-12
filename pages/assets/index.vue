@@ -31,17 +31,17 @@
 			</view>
 			
 			<view class="holdings-list">
-				<view class="holding-card" v-for="(item, index) in stockList" :key="index">
+				<view class="holding-card" v-for="(item, index) in stockList" :key="item.stockUserId || index">
 					<view class="card-icon">
-						<text class="icon-text">{{ (item.itemName || '项')[0] }}</text>
+						<text class="icon-text">{{ (item.stockName || '项')[0] }}</text>
 					</view>
 					<view class="card-info">
-						<text class="item-name">{{ item.itemName || '项目 ' + item.itemId }}</text>
-						<text class="item-id">ID: {{ item.itemId }}</text>
+						<text class="item-name">{{ item.stockName || '项目 ' + item.stockId }}</text>
+						<text class="item-id">ID: {{ item.stockId }}</text>
 					</view>
 					<view class="card-value">
 						<text class="qty-label">持仓量</text>
-						<text class="qty-val">{{ item.quantity }}</text>
+						<text class="qty-val">{{ item.stockNumber }}</text>
 					</view>
 				</view>
 				<u-empty v-if="stockList.length === 0" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" text="暂无持仓数据"></u-empty>
@@ -80,8 +80,9 @@
 			async fetchStock() {
 				try {
 					const res = await getUserStock();
-					if (res.code === 200 || res.code === 0) {
-						this.stockList = res.data || [];
+					if (res.code === 0 && res.data) {
+						// 接口返回 StockUser[] 数组，可能直接是 data 或 data 为数组
+						this.stockList = Array.isArray(res.data) ? res.data : [];
 					}
 				} catch (e) {
 					console.error(e);

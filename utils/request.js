@@ -1,6 +1,9 @@
 // Base URL configuration
 const BASE_URL = '/api'; // In production, this should be the full URL
 
+// Unauthorized codes: 107 未登录, 109 token 已过期
+const UNAUTH_CODES = [107, 109];
+
 // Request wrapper
 const request = (options) => {
 	return new Promise((resolve, reject) => {
@@ -14,7 +17,7 @@ const request = (options) => {
 		};
 		
 		if (token) {
-			header['Authorization'] = token;
+			header['Authorization'] = `Bearer ${token}`;
 		}
 
 		// Show loading by default unless explicitly disabled
@@ -25,29 +28,43 @@ const request = (options) => {
 			});
 		}
 
+		// GET 请求用 data 作为 query，uni.request 的 data 在 GET 时会拼到 url
+		const reqData = options.method === 'GET' && options.params ? options.params : (options.data || {});
+
 		uni.request({
 			url: BASE_URL + options.url,
 			method: options.method || 'GET',
-			data: options.data || {},
+			data: reqData,
 			header: header,
 			success: (res) => {
 				if (res.statusCode === 200) {
-					// Handle business logic codes if needed
-					// Assuming 200 is success, check internal code if your API uses it
-					// e.g., if (res.data.code === 401) ...
-					resolve(res.data);
+					const body = res.data || {};
+					const code = body.code;
+					// 业务成功：code 为 0
+					if (code === 0) {
+						resolve(body);
+					} else if (UNAUTH_CODES.includes(code)) {
+						// token 失效或未登录
+						uni.removeStorageSync('token');
+						uni.removeStorageSync('userInfo');
+						uni.showToast({ title: body.message || '请重新登录', icon: 'none' });
+						uni.reLaunch({ url: '/pages/login/index' });
+						reject(res);
+					} else {
+						uni.showToast({
+							title: body.message || '请求失败',
+							icon: 'none'
+						});
+						reject(res);
+					}
 				} else if (res.statusCode === 401) {
-					// Token expired or invalid
 					uni.removeStorageSync('token');
-					uni.navigateTo({
-						url: '/pages/login/index'
-					});
+					uni.removeStorageSync('userInfo');
+					uni.reLaunch({ url: '/pages/login/index' });
 					reject(res);
 				} else {
-					uni.showToast({
-						title: res.data.msg || '请求失败',
-						icon: 'none'
-					});
+					const msg = (res.data && (res.data.message || res.data.msg)) || '请求失败';
+					uni.showToast({ title: msg, icon: 'none' });
 					reject(res);
 				}
 			},

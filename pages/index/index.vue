@@ -12,13 +12,13 @@
 		</view>
 		
 		<view class="stock-list">
-			<view class="stock-card" v-for="(item, index) in list" :key="index" :class="{'disabled-card': item.status === '已淘汰'}">
+			<view class="stock-card" v-for="(item, index) in list" :key="item.id || index" :class="{'disabled-card': item.status === 2}">
 				<view class="card-header">
 					<view class="header-left">
 						<u-icon name="grid-fill" color="#2979ff" size="24"></u-icon>
 						<text class="item-name">{{ item.name }}</text>
 					</view>
-					<u-tag :text="item.status" :type="getStatusType(item.status)" shape="circle" size="mini"></u-tag>
+					<u-tag :text="getStatusText(item.status)" :type="getStatusType(item.status)" shape="circle" size="mini"></u-tag>
 				</view>
 				
 				<view class="card-body">
@@ -45,7 +45,7 @@
 						估值: <text class="highlight">{{ (item.totalValue / (item.totalQuantity || 1)).toFixed(2) }}</text>
 					</view>
 					<u-button 
-						v-if="item.status === '立项中'" 
+						v-if="item.status === 1" 
 						type="primary" 
 						text="立即申购" 
 						size="small" 
@@ -131,8 +131,8 @@
 			async fetchList() {
 				try {
 					const res = await getStockList();
-					if (res.code === 200 || res.code === 0) {
-						this.list = res.data || [];
+					if (res.code === 0 && res.data) {
+						this.list = res.data.list || [];
 					}
 				} catch (e) {
 					console.error(e);
@@ -150,10 +150,14 @@
 					this.timer = null;
 				}
 			},
+			getStatusText(status) {
+				const map = { 1: '立项中', 2: '已淘汰', 3: '游戏中', 4: '已结算' };
+				return map[status] || '未知';
+			},
 			getStatusType(status) {
-				if (status === '立项中') return 'success';
-				if (status === '游戏中') return 'warning';
-				if (status === '已淘汰') return 'error';
+				if (status === 1) return 'success';
+				if (status === 3) return 'warning';
+				if (status === 2) return 'error';
 				return 'info';
 			},
 			openBuyModal(item) {
@@ -175,13 +179,13 @@
 						quantity: Number(this.buyQuantity)
 					});
 					
-					if (res.code === 200 || res.code === 0) {
+					if (res.code === 0) {
 						uni.showToast({ title: '申购成功', icon: 'success' });
 						this.showBuyModal = false;
 						this.fetchList();
-						this.$store.dispatch('updateUserInfo'); // Update balance
+						this.$store.dispatch('updateUserInfo');
 					} else {
-						uni.showToast({ title: res.msg || '申购失败', icon: 'none' });
+						uni.showToast({ title: (res.message || res.msg) || '申购失败', icon: 'none' });
 						this.showBuyModal = false;
 					}
 				} catch (e) {

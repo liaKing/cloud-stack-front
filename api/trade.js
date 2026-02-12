@@ -1,11 +1,13 @@
 import request from '@/utils/request';
 
-// Get Trade Orders
-export const getTradeOrders = (params) => {
+// 挂单列表
+// params: itemId, orderType(1=卖 2=买), priceMin, priceMax, pageNum, pageSize
+// 响应 data: { list, total, pageNum, pageSize }
+export const getTradeOrders = (params = {}) => {
 	return request({
 		url: '/trade/orders',
 		method: 'GET',
-		data: params
+		params
 	});
 };
 
@@ -45,11 +47,11 @@ export const cancelOrder = (data) => {
 	});
 };
 
-// Trade Records (Optional)
-export const getTradeRecords = (params) => {
+// 成交记录
+export const getTradeRecords = (params = {}) => {
 	return request({
 		url: '/trade/records',
 		method: 'GET',
-		data: params
+		params
 	});
 };

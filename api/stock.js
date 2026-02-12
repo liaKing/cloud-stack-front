@@ -1,11 +1,13 @@
 import request from '@/utils/request';
 
-// Get Official Stock List (Items)
-export const getStockList = (params) => {
+// 获取项目列表（分页）
+// params: pageNum, pageSize, status(1=立项中 2=已淘汰 3=游戏中 4=已结算)
+// 响应 data: { list, total, pageNum, pageSize }
+export const getStockList = (params = {}) => {
 	return request({
-		url: '/stock/list',
+		url: '/stock/item/list',
 		method: 'GET',
-		data: params
+		params
 	});
 };
 

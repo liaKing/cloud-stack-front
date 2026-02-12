@@ -21,7 +21,7 @@
 					<view class="item-name">{{ getItemName(item.itemId) }}</view>
 					<view class="user-info">
 						<u-icon name="account" size="14" color="#909399"></u-icon>
-						<text class="username">{{ item.username || '匿名用户' }}</text>
+						<text class="username">用户 {{ (item.initiatorId || '').toString().slice(-6) || '-' }}</text>
 					</view>
 				</view>
 				
@@ -30,7 +30,7 @@
 						<text class="currency">¥</text>
 						<text class="price">{{ item.price }}</text>
 					</view>
-					<view class="qty">数量: {{ item.quantity }}</view>
+					<view class="qty">可交易: {{ item.remaining !== undefined ? item.remaining : item.quantity }}</view>
 				</view>
 				
 				<view class="card-right">
@@ -62,7 +62,7 @@
 					</view>
 					<view class="summary-item">
 						<text class="label">可交易量</text>
-						<text class="value">{{ currentOrder.quantity }}</text>
+						<text class="value">{{ currentOrder.remaining !== undefined ? currentOrder.remaining : currentOrder.quantity }}</text>
 					</view>
 				</view>
 				
@@ -199,8 +199,8 @@
 			async fetchItems() {
 				try {
 					const res = await getStockList();
-					if (res.code === 200 || res.code === 0) {
-						this.itemList = res.data || [];
+					if (res.code === 0 && res.data) {
+						this.itemList = res.data.list || [];
 					}
 				} catch (e) {}
 			},
@@ -210,12 +210,10 @@
 			},
 			async fetchOrders() {
 				try {
-					// currentTab 0 = '出售大厅' -> API orderType 1 (Sell Orders)
-					// currentTab 1 = '求购大厅' -> API orderType 2 (Buy Orders)
 					const orderType = this.currentTab === 0 ? 1 : 2;
 					const res = await getTradeOrders({ orderType });
-					if (res.code === 200 || res.code === 0) {
-						this.orderList = res.data || []; // Assuming data is array, or data.list
+					if (res.code === 0 && res.data) {
+						this.orderList = res.data.list || [];
 					}
 				} catch (e) {}
 			},
@@ -236,13 +234,13 @@
 						quantity: Number(this.acceptQuantity)
 					});
 					
-					if (res.code === 200 || res.code === 0) {
+					if (res.code === 0) {
 						uni.showToast({ title: '交易成功', icon: 'success' });
 						this.showAcceptModal = false;
 						this.fetchOrders();
 						this.$store.dispatch('updateUserInfo');
 					} else {
-						uni.showToast({ title: res.msg || '交易失败', icon: 'none' });
+						uni.showToast({ title: (res.message || res.msg) || '交易失败', icon: 'none' });
 					}
 				} catch (e) {
 					console.error(e);
@@ -275,13 +273,13 @@
 						res = await postBuyOrder(data);
 					}
 					
-					if (res.code === 200 || res.code === 0) {
+					if (res.code === 0) {
 						uni.showToast({ title: '发布成功', icon: 'success' });
 						this.showPostModal = false;
-						this.postForm = { type: 1, itemId: '', itemName: '', price: '', quantity: '' }; // Reset
-						this.fetchOrders(); // Refresh list if needed (though usually we stay on current tab, if I posted sell, I should see it in Sell tab)
+						this.postForm = { type: 1, itemId: '', itemName: '', price: '', quantity: '' };
+						this.fetchOrders();
 					} else {
-						uni.showToast({ title: res.msg || '发布失败', icon: 'none' });
+						uni.showToast({ title: (res.message || res.msg) || '发布失败', icon: 'none' });
 					}
 				} catch (e) {
 					console.error(e);

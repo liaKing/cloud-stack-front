@@ -6,9 +6,9 @@
 					<u-avatar :src="userInfo.avatar || ''" size="70" shape="circle" icon="account-fill" fontSize="40"></u-avatar>
 				</view>
 				<view class="info-box">
-					<text class="username">{{ userInfo.username || '未登录用户' }}</text>
+					<text class="username">{{ userInfo.userName || userInfo.name || '未登录用户' }}</text>
 					<view class="uid-tag">
-						<text>UID: {{ userInfo.id || '-' }}</text>
+						<text>UID: {{ userInfo.userId || '-' }}</text>
 						<u-icon name="file-text" size="14" color="#fff" style="margin-left: 4px"></u-icon>
 					</view>
 				</view>
@@ -60,6 +60,7 @@
 					<u-collapse-item title="🎯 投壶数据录入">
 						<view class="form-content">
 							<u--input v-model="throwForm.playerPay" placeholder="玩家付费金额 (幸运值)" type="number" border="surround" class="mb-10"></u--input>
+							<u--input v-model="throwForm.totalItems" placeholder="总项目数" type="number" border="surround" class="mb-10"></u--input>
 							<view class="hit-row">
 								<u--input v-model="throwForm.hitItemId" placeholder="命中项目ID" border="surround" class="flex-1 mr-10"></u--input>
 								<u--input v-model="throwForm.hitCount" placeholder="次数" type="number" border="surround" class="w-80"></u--input>
@@ -92,6 +93,7 @@
 				showAdmin: false,
 				throwForm: {
 					playerPay: '',
+					totalItems: '10',
 					hitItemId: '',
 					hitCount: ''
 				}
@@ -99,6 +101,11 @@
 		},
 		computed: {
 			...mapState(['userInfo'])
+		},
+		onShow() {
+			if (this.$store.state.isLogin) {
+				this.$store.dispatch('updateUserInfo');
+			}
 		},
 		methods: {
 			handleLogout() {
@@ -121,17 +128,17 @@
 				
 				const data = {
 					playerPay: Number(this.throwForm.playerPay),
-					totalItems: 10, // Hardcoded or dynamic? Doc says "totalItems" in req.
+					totalItems: Number(this.throwForm.totalItems) || 10,
 					hits: hits
 				};
 				
 				try {
 					const res = await submitThrow(data);
-					if (res.code === 200 || res.code === 0) {
+					if (res.code === 0) {
 						uni.showToast({ title: '录入成功', icon: 'success' });
-						this.throwForm = { playerPay: '', hitItemId: '', hitCount: '' };
+						this.throwForm = { playerPay: '', totalItems: '10', hitItemId: '', hitCount: '' };
 					} else {
-						uni.showToast({ title: res.msg || '失败', icon: 'none' });
+						uni.showToast({ title: (res.message || res.msg) || '失败', icon: 'none' });
 					}
 				} catch (e) {
 					console.error(e);
@@ -140,10 +147,10 @@
 			async doSettlement() {
 				try {
 					const res = await dailySettlement({});
-					if (res.code === 200 || res.code === 0) {
+					if (res.code === 0) {
 						uni.showToast({ title: '结算已触发', icon: 'success' });
 					} else {
-						uni.showToast({ title: res.msg || '失败', icon: 'none' });
+						uni.showToast({ title: (res.message || res.msg) || '失败', icon: 'none' });
 					}
 				} catch (e) {
 					console.error(e);

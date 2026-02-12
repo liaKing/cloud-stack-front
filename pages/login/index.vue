@@ -1,50 +1,50 @@
 <template>
+	<view class="login-page">
 	<view class="login-container">
-		<view class="logo-box">
-			<image style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" src="/static/logo.png" mode="aspectFill"></image>
-			<text class="title">TaoQuan Trading</text>
-			<text class="subtitle">投壶与交易的即时市场</text>
-		</view>
-		
-		<view class="form-card">
+		<view class="login-content">
+			<view class="logo-box">
+				<image class="logo-img" src="/static/logo.png" mode="aspectFill"></image>
+				<text class="title">TaoQuan Trading</text>
+				<text class="subtitle">投壶与交易的即时市场</text>
+			</view>
+			
+			<view class="form-card">
 			<view class="welcome-text">欢迎回来</view>
-			<u--form labelPosition="left" :model="form" ref="uForm">
-				<u-form-item prop="username" class="custom-input">
-					<u--input 
-						v-model="form.username" 
-						placeholder="请输入用户名" 
-						border="none" 
-						prefixIcon="account"
-						prefixIconStyle="font-size: 22px; color: #909399"
-					></u--input>
-				</u-form-item>
-				<u-form-item prop="password" class="custom-input">
-					<u--input 
-						v-model="form.password" 
-						type="password" 
-						placeholder="请输入密码" 
-						border="none"
-						prefixIcon="lock"
-						prefixIconStyle="font-size: 22px; color: #909399"
-					></u--input>
-				</u-form-item>
-			</u--form>
+			<view class="input-group">
+				<text class="input-label">用户名</text>
+				<input 
+					class="input-field"
+					v-model="form.username" 
+					placeholder="请输入用户名"
+				/>
+			</view>
+			<view class="input-group">
+				<text class="input-label">密码</text>
+				<input 
+					class="input-field"
+					v-model="form.password" 
+					type="password"
+					placeholder="请输入密码"
+				/>
+			</view>
 			
 			<view class="btn-box">
 				<u-button 
 					type="primary" 
 					text="登录" 
 					shape="circle" 
-					customStyle="height: 44px; box-shadow: 0 4px 10px rgba(41, 121, 255, 0.3);"
+					customStyle="width: 100%; height: 44px; box-shadow: 0 4px 10px rgba(41, 121, 255, 0.3);"
 					@click="handleLogin" 
 					:loading="loading"
 				></u-button>
 			</view>
 		</view>
+		</view>
 		
 		<view class="footer-text">
 			&copy; 2026 TaoQuan System
 		</view>
+	</view>
 	</view>
 </template>
 
@@ -73,12 +73,14 @@
 				
 				this.loading = true;
 				try {
-					const res = await login(this.form);
-					// Assuming response format: { code: 200, data: { token: '...' }, msg: '...' }
-					// Adjust based on actual API response
-					if (res.code === 200 || res.code === 0) {
-						this.$store.dispatch('login', res.data.token); // Store token
-						this.$store.dispatch('updateUserInfo'); // Fetch user info
+					const res = await login({
+						userName: this.form.username,
+						passWord: this.form.password
+					});
+					if (res.code === 0 && res.data) {
+						const accessToken = res.data.access_token;
+						this.$store.dispatch('login', accessToken);
+						this.$store.dispatch('updateUserInfo');
 						uni.showToast({
 							title: '登录成功',
 							icon: 'success'
@@ -90,7 +92,7 @@
 						}, 1000);
 					} else {
 						uni.showToast({
-							title: res.msg || '登录失败',
+							title: (res.message || res.msg) || '登录失败',
 							icon: 'none'
 						});
 					}
@@ -105,35 +107,60 @@
 </script>
 
 <style lang="scss" scoped>
+/* 外层包裹：限制在视口内，防止溢出导致左侧被裁切 */
+.login-page {
+	width: 100%;
+	min-height: 100vh;
+	overflow-x: hidden;
+	box-sizing: border-box;
+}
+
 .login-container {
+	position: relative;
+	width: 100%;
 	min-height: 100vh;
 	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-	padding: 60px 30px;
+	padding: 30px 24px;
+	box-sizing: border-box;
+	text-align: center;
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	align-items: center;
 	
+	.login-content {
+		display: block;
+		width: 100%;
+		max-width: 360px;
+		text-align: left;
+		box-sizing: border-box;
+		flex-shrink: 0;
+	}
+	
 	.logo-box {
-		margin-bottom: 40px;
+		margin-bottom: 32px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		
 		.logo-img {
+			width: 80px;
+			height: 80px;
+			border-radius: 50%;
 			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 		}
 		
 		.title {
-			margin-top: 20px;
-			font-size: 28px;
+			margin-top: 16px;
+			font-size: 24px;
 			font-weight: 800;
 			color: #303133;
 			letter-spacing: 1px;
 		}
 		
 		.subtitle {
-			margin-top: 8px;
-			font-size: 14px;
+			margin-top: 6px;
+			font-size: 13px;
 			color: #606266;
 			letter-spacing: 0.5px;
 		}
@@ -143,8 +170,9 @@
 		width: 100%;
 		background: #ffffff;
 		border-radius: 16px;
-		padding: 30px 20px;
+		padding: 30px 20px 24px;
 		box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+		box-sizing: border-box;
 		
 		.welcome-text {
 			font-size: 20px;
@@ -153,22 +181,58 @@
 			margin-bottom: 25px;
 		}
 		
-		.custom-input {
-			background-color: #f5f7fa;
-			border-radius: 8px;
+		.input-group {
 			margin-bottom: 20px;
-			padding: 4px 10px;
+			
+			.input-label {
+				display: block;
+				font-size: 14px;
+				color: #606266;
+				margin-bottom: 8px;
+			}
+			
+			.input-field {
+				display: block;
+				width: 100%;
+				height: 44px;
+				padding: 0 16px;
+				background-color: #f5f7fa;
+				border: 1px solid #e4e7ed;
+				border-radius: 8px;
+				font-size: 15px;
+				color: #303133;
+				box-sizing: border-box;
+			}
+			
+			.input-field::placeholder {
+				color: #c0c4cc;
+			}
 		}
 		
 		.btn-box {
+			width: 100%;
 			margin-top: 30px;
+			padding-bottom: 8px;
+			box-sizing: border-box;
 		}
 	}
 	
 	.footer-text {
-		margin-top: auto;
+		position: absolute;
+		bottom: 20px;
+		left: 0;
+		right: 0;
+		text-align: center;
 		font-size: 12px;
 		color: #909399;
 	}
+}
+</style>
+
+<style lang="scss">
+/* 非 scoped：修复 uni-app 页面容器可能导致的布局异常 */
+page {
+	width: 100%;
+	overflow-x: hidden;
 }
 </style>
