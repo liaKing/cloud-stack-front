@@ -31,11 +31,16 @@
 			<view class="btn-box">
 				<u-button 
 					type="primary" 
-					text="登录" 
 					shape="circle" 
-					customStyle="width: 100%; height: 44px; box-shadow: 0 4px 10px rgba(41, 121, 255, 0.3);"
+					:ripple="true"
+					text="登录"
 					@click="handleLogin" 
 					:loading="loading"
+					:customStyle="{
+						width: '100%',
+						height: '44px',
+						boxShadow: '0 4px 10px rgba(41, 121, 255, 0.3)'
+					}"
 				></u-button>
 			</view>
 		</view>
@@ -50,8 +55,12 @@
 
 <script>
 	import { login } from '@/api/user.js';
+	import uButton from 'uview-ui/components/u-button/u-button.vue';
 	
 	export default {
+		components: {
+			uButton
+		},
 		data() {
 			return {
 				form: {
@@ -173,12 +182,18 @@
 		padding: 30px 20px 24px;
 		box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 		box-sizing: border-box;
+		/* 使用 Flex 布局确保内容垂直排列，避免高度塌陷 */
+		display: flex;
+		flex-direction: column;
+		position: relative;
+		overflow: hidden;
 		
 		.welcome-text {
 			font-size: 20px;
 			font-weight: bold;
 			color: #303133;
 			margin-bottom: 25px;
+			display: block;
 		}
 		
 		.input-group {

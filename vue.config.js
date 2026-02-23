@@ -1,4 +1,5 @@
 module.exports = {
+	transpileDependencies: ['uview-ui'],
 	publicPath: './',
 	css: {
 		loaderOptions: {
@@ -18,7 +19,7 @@ module.exports = {
 				changeOrigin: true,
 				logLevel: 'debug',
 				pathRewrite: {
-					'^/api': '/api'
+					'^/api': ''
 				}
 			}
 		}

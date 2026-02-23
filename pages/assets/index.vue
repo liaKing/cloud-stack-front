@@ -44,7 +44,7 @@
 						<text class="qty-val">{{ item.stockNumber }}</text>
 					</view>
 				</view>
-				<u-empty v-if="stockList.length === 0" mode="data" icon="http://cdn.uviewui.com/uview/empty/data.png" text="暂无持仓数据"></u-empty>
+				<u-empty v-if="stockList.length === 0" mode="data" text="暂无持仓数据"></u-empty>
 			</view>
 		</view>
 	</view>
@@ -97,9 +97,12 @@
 	padding: 16px;
 	background-color: #f5f7fa;
 	min-height: 100vh;
+    box-sizing: border-box;
 }
 
 .asset-card {
+	display: inline-block;
+    width: 80%;
 	position: relative;
 	background: linear-gradient(135deg, #2979ff, #609cff);
 	border-radius: 16px;
@@ -173,6 +176,7 @@
 }
 
 .section-box {
+	margin-top: 16px;
 	.section-header {
 		margin-bottom: 16px;
 		

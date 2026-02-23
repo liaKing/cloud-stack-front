@@ -165,9 +165,11 @@
 	padding: 16px;
 	background-color: #f5f7fa;
 	min-height: 100vh;
+    box-sizing: border-box;
 }
 
 .user-header-card {
+	display:flex;
 	background: linear-gradient(135deg, #2979ff, #609cff);
 	border-radius: 16px;
 	padding: 24px;

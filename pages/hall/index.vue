@@ -44,7 +44,7 @@
 					></u-button>
 				</view>
 			</view>
-			<u-empty v-if="orderList.length === 0" mode="list" icon="http://cdn.uviewui.com/uview/empty/list.png" text="暂无交易挂单"></u-empty>
+			<u-empty v-if="orderList.length === 0" mode="list" text="暂无交易挂单"></u-empty>
 		</view>
 		
 		<!-- FAB for Posting -->
@@ -186,6 +186,12 @@
 			this.fetchItems(); // Need item mapping
 			this.fetchOrders();
 		},
+		onHide() {
+			// 切到其他 tab 时关闭弹窗，避免“取消”按钮残留在其他页面
+			this.showAcceptModal = false;
+			this.showPostModal = false;
+			this.showItemSelect = false;
+		},
 		onPullDownRefresh() {
 			this.fetchOrders().finally(() => {
 				uni.stopPullDownRefresh();
@@ -295,6 +301,7 @@
 	background-color: #f5f7fa;
 	min-height: 100vh;
 	padding-bottom: 80px;
+    box-sizing: border-box;
 }
 
 .tab-wrapper {
@@ -304,6 +311,8 @@
 }
 
 .order-list {
+	display:inline-block;
+	width:80%;
 	padding: 16px;
 	
 	.order-card {
