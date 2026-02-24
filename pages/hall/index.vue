@@ -52,8 +52,8 @@
 			<u-icon name="plus" color="#fff" size="28"></u-icon>
 		</view>
 		
-		<!-- Accept Modal -->
-		<u-modal :show="showAcceptModal" :title="currentTab === 0 ? '购买股票' : '出售股票'" showCancelButton confirmColor="#2979ff" @confirm="handleAccept" @cancel="showAcceptModal = false">
+		<!-- Accept Modal：v-if 避免关闭后 DOM 残留导致每页下方出现「取消」 -->
+		<u-modal v-if="showAcceptModal" :show="true" :title="currentTab === 0 ? '购买股票' : '出售股票'" showCancelButton confirmColor="#2979ff" @confirm="handleAccept" @cancel="showAcceptModal = false">
 			<view class="modal-content">
 				<view class="trade-summary">
 					<view class="summary-item">

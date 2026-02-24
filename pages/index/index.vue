@@ -70,9 +70,10 @@
     
     <u-empty v-if="list.length === 0" mode="data" text="暂无项目数据" style="margin-top: 50px;"></u-empty>
     
-    <!-- Buy Modal -->
+    <!-- Buy Modal：v-if 避免关闭后 DOM 残留导致每页下方出现「取消」 -->
     <u-modal 
-      :show="showBuyModal" 
+      v-if="showBuyModal"
+      :show="true"
       title="申购股票" 
       :showCancelButton="true" 
       @confirm="handleBuy" 
@@ -383,6 +384,8 @@ export default {
           margin-right: 12px;
           font-size: 12px;
           color: #606266;
+          position: relative;
+          z-index: 1;
           
           .highlight {
             color: #ff9900;
@@ -394,10 +397,14 @@ export default {
         
         .footer-btn {
           flex-shrink: 0;
+          /* 让容器仅包住按钮，防止内部 u-button 的 width:100% 撑满整行 */
+          display: inline-flex;
+          max-width: 50%;
           /* 覆盖 uView 默认 width:100%，避免白色按钮背景遮挡左侧估值 */
-          .u-button {
+          ::v-deep .u-button,
+          ::v-deep button.u-button {
             width: auto !important;
-            min-width: 6px;
+            min-width: 60px !important;
           }
         }
       }
@@ -458,4 +465,38 @@ export default {
     }
   }
 }
+</style>
+
+<!-- H5 专用：彻底去掉官方市场列表项内白色块（按钮伪元素/默认宽/图标区背景） -->
+<style lang="scss">
+/* #ifdef H5 */
+.container .stock-list .stock-card {
+  .footer-btn {
+    width: fit-content !important;
+  }
+  .footer-btn .u-button,
+  .footer-btn button,
+  .footer-btn .u-reset-button {
+    width: auto !important;
+    min-width: 60px !important;
+    max-width: none !important;
+  }
+  .footer-btn .u-button::before,
+  .footer-btn button::before {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  .footer-btn button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .card-header .header-left .u-icon,
+  .card-header .header-left > view,
+  .card-header .header-left [class*="u-icon"] {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+}
+/* #endif */
 </style>

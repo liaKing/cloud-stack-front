@@ -10,6 +10,14 @@
         (coverSupport ? ', viewport-fit=cover' : '') + '" />')
     </script>
     <title>云股东</title>
+    <!-- H5：提前加载 uView 图标字体，避免 u-icon 显示为白块 -->
+    <style>
+      @font-face {
+        font-family: 'uicon-iconfont';
+        src: url('/static/fonts/uicon-iconfont.ttf') format('truetype');
+        font-display: block;
+      }
+    </style>
     <!--preload-links-->
     <!--app-context-->
   </head>

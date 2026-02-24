@@ -47,6 +47,13 @@
 	/* 建议在各页面组件中按需添加 */
 	
     /* #ifdef H5 */
+    /* uView 图标字体：优先本地，避免 H5 下 u-icon 只显示白块（CDN 未加载） */
+    @font-face {
+        font-family: 'uicon-iconfont';
+        src: url('/static/fonts/uicon-iconfont.ttf') format('truetype'),
+             url('https://at.alicdn.com/t/font_2225171_8kdcwk4po24.ttf') format('truetype');
+        font-display: block;
+    }
     /* 修复 H5 端 Tabbar 样式异常 - 占据整行平均铺开（框架实际类名为 uni-tabbar__item） */
     uni-tabbar {
         width: 100% !important;
@@ -74,6 +81,40 @@
     uni-tabbar .uni-tabbar__icon img {
         width: 100% !important;
         height: 100% !important;
+    }
+    /* 全局消除 H5 白块：uView 按钮默认 width:100% + plain 白底会铺满产生白块 */
+    .u-button,
+    button.u-button,
+    button[class*="u-button"],
+    .u-reset-button {
+        width: auto !important;
+        max-width: 100% !important;
+        position: relative !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+    .u-button::before,
+    button.u-button::before,
+    button[class*="u-button"]::before {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+    /* 图标组件及内层 span 强制透明，避免字体未加载时出现白块 */
+    .u-icon,
+    [class*="u-icon"],
+    .u-icon__icon,
+    [class*="u-icon__icon"] {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    /* 卡片/列表项裁剪溢出，防止白块露出 */
+    .stock-card,
+    .order-card,
+    .asset-card,
+    .holding-card {
+        overflow: hidden !important;
     }
     /* #endif */
 </style>
