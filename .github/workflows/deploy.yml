@@ -25,11 +25,13 @@ jobs:
           node-version: '16'
           cache: 'npm'
 
-      # 【注意】uni-app 依赖包较多且包含 @dcloudio/* 系列，
-      # npm install 可能因 peer dependency 冲突报错退出。
-      # 解决方案：加 --legacy-peer-deps 跳过严格的对等依赖检查。
+      # 【注意】@dcloudio/* 系列包在 package.json 中使用 latest 标签，
+      # npm install 每次都会拉取最新版本，不同包之间版本不兼容时会出现：
+      # "Export 'recyclableRender' is not defined"
+      # 解决方案：改用 npm ci，严格按照 package-lock.json 锁定的版本安装，
+      # 与本地开发环境保持完全一致，避免 CI 上版本漂移导致的编译错误。
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       # 构建 H5 产物，输出目录为 dist/build/h5
       - name: Build H5
