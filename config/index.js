@@ -9,6 +9,7 @@
 // 生产环境：nginx 反向代理 /api → localhost:8889
 const BASE_URL = '/api'
 
+
 export default {
   BASE_URL
 }
