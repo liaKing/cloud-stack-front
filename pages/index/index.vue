@@ -471,6 +471,7 @@ export default {
 <style lang="scss">
 /* #ifdef H5 */
 .container .stock-list .stock-card {
+  padding: 0 !important;
   .footer-btn {
     width: fit-content !important;
   }

@@ -48,8 +48,8 @@
 		
 		<view class="version-text">Version 1.0.0</view>
 		
-		<!-- Admin Popup -->
-		<u-popup :show="showAdmin" mode="bottom" @close="showAdmin = false" :round="16">
+		<!-- Admin Popup：v-if 避免关闭后 DOM 残留导致页面底部出现「取消」 -->
+		<u-popup v-if="showAdmin" :show="true" mode="bottom" @close="showAdmin = false" :round="16">
 			<view class="admin-panel">
 				<view class="panel-header">
 					<text class="title">管理员控制台</text>

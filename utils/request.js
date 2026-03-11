@@ -1,5 +1,6 @@
 // Base URL configuration
-const BASE_URL = '/api'; // In production, this should be the full URL
+import config from '@/config/index.js'
+const BASE_URL = config.BASE_URL;
 
 // Unauthorized codes: 107 未登录, 109 token 已过期
 const UNAUTH_CODES = [107, 109];

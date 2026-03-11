@@ -115,11 +115,24 @@
         background-color: transparent !important;
         background: transparent !important;
     }
-    /* 卡片/列表项裁剪溢出，防止白块露出 */
+    /* u-tag：u-transition 和 u-tag-wrapper 两层 div 在 H5 默认为 block 全宽白色，需改为 inline-flex 并透明 */
+    .u-tag-wrapper {
+        display: inline-flex !important;
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    .u-transition {
+        background-color: transparent !important;
+        background: transparent !important;
+    }
+    /* 卡片/列表项裁剪溢出，防止白块露出；同时去掉 padding 防止内部 uView 组件撑出白块 */
     .stock-card,
     .order-card,
-    .asset-card,
     .holding-card {
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+    .asset-card {
         overflow: hidden !important;
     }
     /* #endif */
