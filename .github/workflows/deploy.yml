@@ -1,0 +1,77 @@
+name: Deploy Frontend to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 【注意】uni-app + vue-cli-service 对 Node.js 版本敏感，
+      # Node 16 是 Vue 2 + @vue/cli-service ~5.x 的最稳定版本。
+      # 若升级到 Node 18/20 可能出现 OpenSSL 兼容问题：
+      # "Error: error:0308010C:digital envelope routines::unsupported"
+      # 解决方案一：固定使用 Node 16（推荐）
+      # 解决方案二：Node 18+ 时设置 NODE_OPTIONS=--openssl-legacy-provider
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      # 【注意】uni-app 依赖包较多且包含 @dcloudio/* 系列，
+      # npm install 可能因 peer dependency 冲突报错退出。
+      # 解决方案：加 --legacy-peer-deps 跳过严格的对等依赖检查。
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      # 构建 H5 产物，输出目录为 dist/build/h5
+      - name: Build H5
+        run: npm run build:h5
+
+      # 【注意】直接用 scp 将整个目录推送到服务器 Nginx 静态文件目录。
+      # strip_components: 3 的作用是去掉 dist/build/h5 这三层路径前缀，
+      # 使文件直接落在 target 目录下，而不是 target/dist/build/h5/ 子目录。
+      - name: Deploy static files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "dist/build/h5/*"
+          target: ${{ secrets.FRONT_DEPLOY_PATH }}
+          strip_components: 3
+
+      # 【注意】scp 推送完成后静态文件即可生效，Nginx 无需重启。
+      # 但若 Nginx 配置本身发生变更（如新增路由规则），需要执行 nginx -s reload。
+      # 下面这步仅做健康检查，确认服务仍在响应。
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.FRONT_DEPLOY_PATH }}"
+
+            # 【注意】服务器使用宝塔面板管理的 Nginx，pid 文件路径与标准安装不同，
+            # 因此 nginx -s reload 会因 pid 文件为空而报错。
+            # 解决方案：统一使用 systemctl reload nginx 代替 nginx -s reload。
+            systemctl reload nginx
+
+            # 检查部署目录下是否存在 index.html
+            if [ -f "$DEPLOY_PATH/index.html" ]; then
+              echo "✅ Frontend deployed successfully"
+              echo "   Path: $DEPLOY_PATH"
+              echo "   index.html size: $(du -sh $DEPLOY_PATH/index.html | cut -f1)"
+            else
+              echo "❌ Deployment verification failed: index.html not found"
+              exit 1
+            fi
