@@ -101,6 +101,12 @@
         visibility: hidden !important;
         pointer-events: none !important;
     }
+    /* plain/info/default 类型按钮消除浏览器默认白色背景 */
+    button.u-button.u-button--plain,
+    button.u-button.u-button--info,
+    button.u-reset-button {
+        background-color: transparent !important;
+    }
     /* 图标组件及内层 span 强制透明，避免字体未加载时出现白块 */
     .u-icon,
     [class*="u-icon"],
